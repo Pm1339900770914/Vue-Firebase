@@ -1,13 +1,40 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const isloading = ref(false)
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
+const isUpdated = ref(false)
+const isValid = ref(true)
+const errorMessage = ref('')
 
 const fullName = computed(() => {
   return `${firstName.value} ${lastName.value}`
+})
+
+const updateProfile = async () => {
+  isloading.value = true
+  await (new Promise(resolve => setTimeout(resolve, 2000))) // จำลองการอัพเดตข้อมูล
+  isloading.value = false
+  isUpdated.value = true
+
+}
+
+const validateName = (name) => {
+  const re = /\d/
+  return !re.test(name)
+}
+
+watch([firstName, lastName, email], () => {
+  isValid.value = true
+  isUpdated.value = false
+  errorMessage.value = {}
+
+  if(!validateName(firstName.value)) {
+    isValid.value = false
+    errorMessage.value.firstName = 'First name should not contain numbers.'
+  }
 })
 
 onMounted(() => {
@@ -47,7 +74,11 @@ onMounted(() => {
       Updating...
     </div>
 
-    <button class="btn-update">Update Profile</button>
+    <div class="status-success" v-if="isUpdated">
+      Profile updated successfully!
+    </div>
+    
+    <button :disabled="!isValid" @click="updateProfile" class="btn-update">Update Profile</button>
   </div>
 </template>
 
@@ -112,6 +143,21 @@ input:focus {
   margin: 15px 0;
 }
 
+.status-loading .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ddd;
+  border-top-color: #42b983;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.status-success {
+  text-align: center;
+  color: #42b983;
+  font-weight: 600;
+  margin: 15px 0;
+}
 /* 5. ปุ่มที่มีมิติ */
 .btn-update {
   width: 100%;
