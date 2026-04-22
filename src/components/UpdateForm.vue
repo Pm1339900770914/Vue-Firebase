@@ -7,7 +7,7 @@ const lastName = ref('')
 const email = ref('')
 const isUpdated = ref(false)
 const isValid = ref(true)
-const errorMessage = ref('')
+const errorMessage = ref({})
 
 const fullName = computed(() => {
   return `${firstName.value} ${lastName.value}`
@@ -26,6 +26,11 @@ const validateName = (name) => {
   return !re.test(name)
 }
 
+const validateEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return re.test(email)
+}
+
 watch([firstName, lastName, email], () => {
   isValid.value = true
   isUpdated.value = false
@@ -34,6 +39,16 @@ watch([firstName, lastName, email], () => {
   if(!validateName(firstName.value)) {
     isValid.value = false
     errorMessage.value.firstName = 'First name should not contain numbers.'
+  }
+
+  if(!validateName(lastName.value)) {
+    isValid.value = false
+    errorMessage.value.lastName = 'Last name should not contain numbers.'
+  }
+
+  if(!validateEmail(email.value)) {
+    isValid.value = false
+    errorMessage.value.email = 'Please enter a valid email address.'
   }
 })
 
@@ -57,16 +72,19 @@ onMounted(() => {
     <div class="form-group">
       <label>First Name</label>
       <input type="text" placeholder="Enter your first name" v-model="firstName"/>
+      <div class="error" v-if="errorMessage.firstName">{{ errorMessage.firstName }}</div>
     </div>
 
     <div class="form-group">
       <label>Last Name</label>
       <input type="text" placeholder="Enter your last name" v-model="lastName"/>
+      <div class="error" v-if="errorMessage.lastName">{{ errorMessage.lastName }}</div>
     </div>
 
     <div class="form-group">
       <label>Email Address</label>
       <input type="email" placeholder="example@mail.com" v-model="email"/>
+      <div class="error" v-if="errorMessage.email">{{ errorMessage.email }}</div>
     </div>
 
     <div class="status-loading" v-if="isloading">
@@ -163,21 +181,15 @@ input:focus {
   width: 100%;
   padding: 12px;
   background-color: #42b983;
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  border-radius: 5px;
 }
 
-.btn-update:hover {
-  background-color: #3aa876;
-}
-
-.btn-update:active {
-  transform: scale(0.98); /* กดแล้วยุบนิดนึง */
+.btn-update:disabled {
+  background-color: #bbb1b1;   /* สีเทา */
+  cursor: not-allowed;      /* เปลี่ยน cursor */
+  opacity: 0.7;             /* จางลงนิดนึง */
 }
 
 .profile-info {
@@ -192,5 +204,11 @@ input:focus {
 .showinfo {
   font-weight: 600;
   color: #333;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 5px;
 }
 </style>
